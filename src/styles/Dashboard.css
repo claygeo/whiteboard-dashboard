@@ -1,0 +1,476 @@
+.dashboard {
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    background-color: #d4d4d4; /* Light gray background for the entire app */
+    color: white;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+.dashboard .dashboard-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 5px;
+}
+
+.dashboard .logout-button {
+    padding: 4px 10px;
+    background-color: #d3d3d3;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .logout-button:hover {
+    background-color: #b0b0b0;
+}
+
+.dashboard .batch-details {
+    background-color: #d4d4d4; /* Solid light gray background */
+    padding: 10px;
+    border: 1px solid #999;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard .batch-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dashboard .curaleaf-logo {
+    width: 40px;
+    height: auto;
+    padding: 2px;
+    opacity: 0.9;
+}
+
+.dashboard .batch-details-title {
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+.dashboard .batch-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.dashboard .form-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashboard .form-group label {
+    width: 80px;
+    font-size: 12px;
+    color: #333;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .form-group input,
+.dashboard .form-group select {
+    flex: 1;
+    padding: 4px;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .form-group select {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 5px center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 20px;
+}
+
+.dashboard .form-group input[readonly] {
+    background-color: #e0e0e0;
+    color: #666;
+}
+
+.dashboard .buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.dashboard .buttons button {
+    padding: 4px 10px;
+    background-color: #d3d3d3;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .buttons button:first-child {
+    background-color: #c0c0c0;
+}
+
+.dashboard .buttons .submit-button {
+    background-color: #d3d3d3;
+}
+
+.dashboard .buttons .submit-button.active {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.dashboard .buttons button:hover {
+    background-color: #b0b0b0;
+}
+
+.dashboard .buttons .submit-button.active:hover {
+    background-color: #0056b3;
+}
+
+.dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    border: 1px solid #999;
+}
+
+.dashboard th,
+.dashboard td {
+    padding: 6px 8px;
+    text-align: left;
+    border: 1px solid #999;
+}
+
+.dashboard th {
+    background-color: #00A550; /* Curaleaf green */
+    color: white;
+    font-weight: bold;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+.dashboard tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+.dashboard td {
+    color: #333;
+}
+
+.dashboard .table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #d4d4d4;
+    padding: 5px;
+    border: 1px solid #999;
+    border-radius: 3px;
+    position: relative; /* For positioning the fixed pagination */
+}
+
+.dashboard .search-input {
+    width: 100%;
+    padding: 4px;
+    margin-bottom: 5px;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .delete-button {
+    padding: 4px 8px;
+    background-color: #d3d3d3;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .delete-button:hover {
+    background-color: #b0b0b0;
+}
+
+/* Batch Update Popup */
+.batch-update-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #d4d4d4;
+    padding: 25px;
+    border: 2px solid #00A550; /* Curaleaf green border */
+    border-radius: 8px; /* More rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    color: #333;
+    width: 400px;
+    max-width: 90%;
+    animation: fadeIn 0.3s ease-in-out; /* Fade-in animation */
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Fade-out animation (applied via class) */
+.batch-update-container.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+}
+
+.batch-update-container h3 {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333; /* Deep gray for better contrast */
+    text-align: center;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.batch-update-container .error-message {
+    color: #d9534f; /* Red for error messages */
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.batch-update-container .form-group {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Increased gap for better spacing */
+    margin-bottom: 15px;
+}
+
+.batch-update-container label {
+    width: 140px;
+    font-size: 12px;
+    color: #333;
+    font-weight: bold;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.batch-update-container input,
+.batch-update-container select {
+    flex: 1;
+    padding: 6px; /* Increased padding for better usability */
+    background-color: #fff;
+    border: 1px solid #999;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #333;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    transition: border-color 0.2s ease; /* Smooth transition for focus state */
+}
+
+.batch-update-container input:focus,
+.batch-update-container select:focus {
+    border-color: #00A550; /* Curaleaf green on focus */
+    outline: none;
+}
+
+.batch-update-container input[readonly] {
+    background-color: #e0e0e0;
+    color: #666;
+}
+
+.batch-update-container select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 5px center;
+    padding-right: 20px;
+}
+
+.batch-update-container .buttons {
+    justify-content: center;
+    gap: 12px; /* Increased gap for better spacing */
+}
+
+.batch-update-container button {
+    padding: 8px 16px; /* Increased padding for larger buttons */
+    background-color: #00A550; /* Curaleaf green */
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.batch-update-container button:hover {
+    background-color: #008c42; /* Darker green for hover */
+}
+
+.batch-update-container .delete-button {
+    background-color: #d9534f; /* Red for delete button */
+}
+
+.batch-update-container .delete-button:hover {
+    background-color: #c9302c; /* Darker red for hover */
+}
+
+.batch-update-container .curaleaf-logo {
+    width: 100px;
+    margin: 0 auto 15px;
+    display: block;
+    padding: 2px;
+    opacity: 0.9;
+}
+
+/* Popup Header for Dragging */
+.popup-header {
+    cursor: move; /* Indicate that the header is draggable */
+    user-select: none; /* Prevent text selection while dragging */
+}
+
+/* Filter and Sort Container */
+.filter-sort {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.filter-sort input {
+    padding: 2px;
+    font-size: 10px;
+    width: 80%;
+    border: 1px solid #999;
+    border-radius: 2px;
+}
+
+.filter-sort button {
+    padding: 2px 5px;
+    font-size: 10px;
+    background-color: #d3d3d3;
+    border: 1px solid #999;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.filter-sort button:hover {
+    background-color: #b0b0b0;
+}
+
+/* Pagination Controls */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px; /* Increased gap for better spacing */
+    margin: 10px 0;
+    font-size: 16px; /* Increased font size for better visibility */
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.pagination button,
+.pagination select {
+    padding: 6px 12px; /* Increased padding for larger buttons */
+    background-color: #d4d4d4;
+    color: #333;
+    border: 1px solid #999;
+    border-radius: 3px; /* Slightly rounded corners */
+    cursor: pointer;
+    font-size: 14px; /* Slightly larger font for buttons and dropdown */
+    font-weight: bold; /* Bold text for better visibility */
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.pagination button:disabled {
+    background-color: #c0c0c0;
+    cursor: not-allowed;
+    box-shadow: none; /* Remove shadow for disabled state */
+}
+
+.pagination button:hover:not(:disabled),
+.pagination select:hover {
+    background-color: #b0b0b0;
+}
+
+.pagination span {
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* Subtle shadow for text contrast */
+}
+
+.pagination input {
+    width: 50px;
+    padding: 4px;
+    border: 1px solid #999;
+    border-radius: 3px;
+    font-size: 14px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    text-align: center;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for input */
+}
+
+/* Bottom Pagination Controls (Outside Table Container) */
+.pagination-bottom {
+    margin-top: 10px;
+    padding: 5px 0;
+    background-color: #d4d4d4;
+    border-top: 1px solid #999;
+}
+
+/* Form Label Styling */
+.form-label {
+    width: 80px;
+    font-size: 12px;
+    color: #333;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+    font-weight: bold;
+    background-color: #e8e8e8; /* Light gray background for contrast */
+    padding: 3px 6px;
+    border-radius: 3px;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow to make it pop */
+    border: 1px solid #999; /* Thin border for definition */
+}
