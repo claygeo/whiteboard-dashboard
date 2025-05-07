@@ -1,7 +1,7 @@
 .dashboard {
     font-family: 'MS Sans Serif', Arial, sans-serif;
-    background-color: #d4d4d4; /* Light gray background for the entire app */
-    color: white;
+    background-color: #d4d4d4;
+    color: #333;
     padding: 10px;
     min-height: 100vh;
 }
@@ -28,7 +28,7 @@
 }
 
 .dashboard .batch-details {
-    background-color: #d4d4d4; /* Solid light gray background */
+    background-color: #d4d4d4;
     padding: 10px;
     border: 1px solid #999;
     border-radius: 3px;
@@ -80,17 +80,20 @@
 .dashboard .form-group input,
 .dashboard .form-group select {
     flex: 1;
-    padding: 4px;
+    padding: 4px; /* 4px on all sides */
     background-color: #fff;
     color: #333;
     border: 1px solid #999;
     border-radius: 2px;
     font-size: 12px;
     font-family: 'MS Sans Serif', Arial, sans-serif;
+    height: 28px;
+    box-sizing: border-box;
+    line-height: 20px; /* Center text within the 20px content area (28px - 4px top - 4px bottom) */
 }
 
 .dashboard .form-group select {
-    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
     background-repeat: no-repeat;
     background-position: right 5px center;
     appearance: none;
@@ -160,7 +163,7 @@
 }
 
 .dashboard th {
-    background-color: #00A550; /* Curaleaf green */
+    background-color: #00A550;
     color: white;
     font-weight: bold;
     font-family: 'MS Sans Serif', Arial, sans-serif;
@@ -185,7 +188,7 @@
     padding: 5px;
     border: 1px solid #999;
     border-radius: 3px;
-    position: relative; /* For positioning the fixed pagination */
+    position: relative;
 }
 
 .dashboard .search-input {
@@ -215,7 +218,6 @@
     background-color: #b0b0b0;
 }
 
-/* Batch Update Popup */
 .batch-update-container {
     position: fixed;
     top: 50%;
@@ -223,17 +225,16 @@
     transform: translate(-50%, -50%);
     background-color: #d4d4d4;
     padding: 25px;
-    border: 2px solid #00A550; /* Curaleaf green border */
-    border-radius: 8px; /* More rounded corners */
+    border: 2px solid #00A550;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     font-family: 'MS Sans Serif', Arial, sans-serif;
     color: #333;
     width: 400px;
     max-width: 90%;
-    animation: fadeIn 0.3s ease-in-out; /* Fade-in animation */
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Fade-in animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -245,7 +246,6 @@
     }
 }
 
-/* Fade-out animation (applied via class) */
 .batch-update-container.fade-out {
     animation: fadeOut 0.3s ease-in-out forwards;
 }
@@ -265,24 +265,23 @@
     margin: 0 0 20px 0;
     font-size: 16px;
     font-weight: bold;
-    color: #333; /* Deep gray for better contrast */
+    color: #333;
     text-align: center;
     font-family: 'MS Sans Serif', Arial, sans-serif;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.batch-update-container .error-message {
-    color: #d9534f; /* Red for error messages */
-    font-size: 12px;
-    margin-bottom: 10px;
-    text-align: center;
+.batch-update-container .error {
+    color: #d9534f;
+    font-size: 10px;
+    margin-left: 8px;
     font-family: 'MS Sans Serif', Arial, sans-serif;
 }
 
 .batch-update-container .form-group {
     display: flex;
     align-items: center;
-    gap: 12px; /* Increased gap for better spacing */
+    gap: 12px;
     margin-bottom: 15px;
 }
 
@@ -297,19 +296,19 @@
 .batch-update-container input,
 .batch-update-container select {
     flex: 1;
-    padding: 6px; /* Increased padding for better usability */
+    padding: 6px;
     background-color: #fff;
     border: 1px solid #999;
     border-radius: 3px;
     font-size: 12px;
     color: #333;
     font-family: 'MS Sans Serif', Arial, sans-serif;
-    transition: border-color 0.2s ease; /* Smooth transition for focus state */
+    transition: border-color 0.2s ease;
 }
 
 .batch-update-container input:focus,
 .batch-update-container select:focus {
-    border-color: #00A550; /* Curaleaf green on focus */
+    border-color: #00A550;
     outline: none;
 }
 
@@ -330,31 +329,31 @@
 
 .batch-update-container .buttons {
     justify-content: center;
-    gap: 12px; /* Increased gap for better spacing */
+    gap: 12px;
 }
 
 .batch-update-container button {
-    padding: 8px 16px; /* Increased padding for larger buttons */
-    background-color: #00A550; /* Curaleaf green */
+    padding: 8px 16px;
+    background-color: #00A550;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
     font-family: 'MS Sans Serif', Arial, sans-serif;
-    transition: background-color 0.2s ease; /* Smooth hover transition */
+    transition: background-color 0.2s ease;
 }
 
 .batch-update-container button:hover {
-    background-color: #008c42; /* Darker green for hover */
+    background-color: #008c42;
 }
 
 .batch-update-container .delete-button {
-    background-color: #d9534f; /* Red for delete button */
+    background-color: #d9534f;
 }
 
 .batch-update-container .delete-button:hover {
-    background-color: #c9302c; /* Darker red for hover */
+    background-color: #c9302c;
 }
 
 .batch-update-container .curaleaf-logo {
@@ -365,13 +364,11 @@
     opacity: 0.9;
 }
 
-/* Popup Header for Dragging */
 .popup-header {
-    cursor: move; /* Indicate that the header is draggable */
-    user-select: none; /* Prevent text selection while dragging */
+    cursor: move;
+    user-select: none;
 }
 
-/* Filter and Sort Container */
 .filter-sort {
     display: flex;
     align-items: center;
@@ -400,35 +397,34 @@
     background-color: #b0b0b0;
 }
 
-/* Pagination Controls */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px; /* Increased gap for better spacing */
+    gap: 12px;
     margin: 10px 0;
-    font-size: 16px; /* Increased font size for better visibility */
+    font-size: 16px;
     font-family: 'MS Sans Serif', Arial, sans-serif;
 }
 
 .pagination button,
 .pagination select {
-    padding: 6px 12px; /* Increased padding for larger buttons */
+    padding: 6px 12px;
     background-color: #d4d4d4;
     color: #333;
     border: 1px solid #999;
-    border-radius: 3px; /* Slightly rounded corners */
+    border-radius: 3px;
     cursor: pointer;
-    font-size: 14px; /* Slightly larger font for buttons and dropdown */
-    font-weight: bold; /* Bold text for better visibility */
+    font-size: 14px;
+    font-weight: bold;
     font-family: 'MS Sans Serif', Arial, sans-serif;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .pagination button:disabled {
     background-color: #c0c0c0;
     cursor: not-allowed;
-    box-shadow: none; /* Remove shadow for disabled state */
+    box-shadow: none;
 }
 
 .pagination button:hover:not(:disabled),
@@ -439,7 +435,7 @@
 .pagination span {
     font-weight: bold;
     color: #333;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2); /* Subtle shadow for text contrast */
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .pagination input {
@@ -450,10 +446,9 @@
     font-size: 14px;
     font-family: 'MS Sans Serif', Arial, sans-serif;
     text-align: center;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for input */
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Bottom Pagination Controls (Outside Table Container) */
 .pagination-bottom {
     margin-top: 10px;
     padding: 5px 0;
@@ -461,16 +456,96 @@
     border-top: 1px solid #999;
 }
 
-/* Form Label Styling */
 .form-label {
     width: 80px;
     font-size: 12px;
     color: #333;
     font-family: 'MS Sans Serif', Arial, sans-serif;
     font-weight: bold;
-    background-color: #e8e8e8; /* Light gray background for contrast */
+    background-color: #e8e8e8;
     padding: 3px 6px;
     border-radius: 3px;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow to make it pop */
-    border: 1px solid #999; /* Thin border for definition */
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    border: 1px solid #999;
+}
+
+/* Ensure ProductSelector stretches to match other inputs */
+.dashboard .form-group .product-selector-container {
+    flex: 1; /* Stretch to fill available space */
+    width: 100%; /* Ensure full width */
+}
+
+/* Override react-select styles to match the centering approach */
+.dashboard .form-group .react-select__control {
+    padding: 4px; /* Match padding of other inputs */
+    height: 28px;
+    min-height: 28px;
+    width: 100%; /* Ensure it takes the full width of the container */
+    box-sizing: border-box;
+    border: 1px solid #999;
+    border-radius: 2px;
+    background-color: #fff;
+    color: #333;
+    font-size: 12px;
+    font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.dashboard .form-group .react-select__control--is-focused {
+    border-color: #00A550;
+}
+
+.dashboard .form-group .react-select__value-container {
+    padding: 0 4px; /* Match the padding of other inputs */
+    height: 20px; /* Match the content area (28px - 4px top - 4px bottom) */
+}
+
+.dashboard .form-group .react-select__input-container {
+    margin: 0;
+    padding: 0;
+    height: 20px; /* Match value-container height */
+}
+
+.dashboard .form-group .react-select__input {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
+.dashboard .form-group .react-select__single-value {
+    margin: 0;
+    padding: 0;
+    line-height: 20px; /* Match the content area to center the text */
+}
+
+.dashboard .form-group .react-select__placeholder {
+    margin: 0;
+    padding: 0;
+    line-height: 20px; /* Match the content area to center the placeholder */
+}
+
+.dashboard .form-group .react-select__dropdown-indicator,
+.dashboard .form-group .react-select__clear-indicator {
+    padding: 0; /* Remove padding to center icons */
+    height: 20px; /* Match the content area */
+    width: 20px; /* Ensure consistent width for icons */
+    display: flex;
+    align-items: center; /* Vertically center the icons */
+    justify-content: center; /* Horizontally center the icons */
+}
+
+.dashboard .form-group .react-select__dropdown-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center; /* Center the caret */
+    padding-right: 0; /* Remove extra padding */
+}
+
+.dashboard .form-group .react-select__dropdown-indicator svg {
+    display: none; /* Hide the default react-select caret */
+}
+
+.dashboard .form-group .react-select__clear-indicator svg {
+    width: 16px; /* Match the new caret size */
+    height: 16px;
 }
