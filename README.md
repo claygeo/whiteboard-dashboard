@@ -27,5 +27,3 @@ A React and Electron desktop app for batch tracking, integrated with Supabase fo
 - Line lead names are placeholders or authorized for public sharing.
 - Ensure `.env` is not committed (excluded via `.gitignore`).
 
-## License
-Licensed under the MIT License. See [LICENSE](LICENSE) for details.
