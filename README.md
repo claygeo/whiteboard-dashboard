@@ -139,8 +139,8 @@ Below are screenshots showcasing the application's interface and features. (Repl
 
 - Login Screen: ![image](https://github.com/user-attachments/assets/fd2be890-1d49-491b-a6f3-bf023c46729e)
 - Dashboard: ![image](https://github.com/user-attachments/assets/e6f2435b-67f1-4555-aba7-073c9a8859d0)
-- Data Table: [Insert image link or filename]
-- Batch Entry Form: [Insert image link or filename]
+- Data Table: ![image](https://github.com/user-attachments/assets/bf31ba4c-77c2-4975-bc41-8852a82421c2)
+- Batch Entry Form: ![image](https://github.com/user-attachments/assets/6c914afa-05bc-4da6-865d-d7a5b80ed5d7)
 
 ## Notes
 
