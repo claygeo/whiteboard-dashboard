@@ -135,7 +135,7 @@ CREATE TABLE weekly_batch_summary (
 
 ## Visuals
 
-Below are screenshots showcasing the application's interface and features. (Replace this section with actual image links or filenames once provided.)
+Below are screenshots showcasing the application's interface and features.
 
 - Login Screen: ![image](https://github.com/user-attachments/assets/fd2be890-1d49-491b-a6f3-bf023c46729e)
 - Dashboard: ![image](https://github.com/user-attachments/assets/e6f2435b-67f1-4555-aba7-073c9a8859d0)
