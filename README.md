@@ -1,6 +1,6 @@
 # Whiteboard Project
 
-A React and Electron desktop app for batch tracking, integrated with Supabase for data storage. Developed for Curaleaf, it tracks batch details, calculates takt-time metrics, and provides a dashboard for production monitoring.
+A React and Electron desktop app for batch tracking, integrated with Supabase for data storage. A demo was developed for Curaleaf, it tracks batch details, calculates takt-time metrics, and provides a dashboard for production monitoring.
 
 ## Features
 - Login with line and line lead selection
