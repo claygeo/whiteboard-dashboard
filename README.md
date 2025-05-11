@@ -3,12 +3,12 @@
 A React and Electron desktop application designed for batch tracking, integrated with Supabase for robust data storage. Developed as a demo for Curaleaf, this app enables tracking of batch details, calculates takt-time metrics, and provides a dashboard for real-time production monitoring.
 
 ## Table of Contents
-- Features (#features)
-- Prerequisites (#prerequisites)
-- Setup (#setup)
-- Database Setup (#database-setup)
-- Visuals (#visuals)
-- Notes (#notes)
+- Features(#features)
+- Prerequisites(#prerequisites)
+- Setup(#setup)
+- Database Setup(#database-setup)
+- Visuals(#visuals)
+- Notes(#notes)
 
 ## Features
 
