@@ -1,6 +1,6 @@
 # Whiteboard Project
 
-A React and Electron desktop application designed for batch tracking, integrated with Supabase for robust data storage. Developed as a demo for Curaleaf, this app enables tracking of batch details, calculates takt-time metrics, and provides a dashboard for real-time production monitoring https://github.com/claygeo/whiteboard-dashboard-visual.
+A React and Electron desktop application designed for batch tracking, integrated with Supabase for robust data storage. Developed as a demo for Curaleaf, this app enables tracking of batch details, calculates takt-time metrics, and provides a dashboard for real-time production monitoring. https://github.com/claygeo/whiteboard-dashboard-visual
 
 ## Table of Contents
 
