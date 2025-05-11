@@ -10,8 +10,6 @@ A React and Electron desktop application designed for batch tracking, integrated
 - [Database Setup](#database-setup)
 - [Visuals](#visuals)
 - [Notes](#notes)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
