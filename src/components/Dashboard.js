@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DataTable from './DataTable';
 import BatchNumberUpdate from './BatchNumberUpdate';
-import Product
-
-Selector from './ProductSelector';
+import ProductSelector from './ProductSelector'; // Fixed import
 import { supabase } from './supabaseClient';
 import { format, toZonedTime } from 'date-fns-tz';
 import '../styles/Dashboard.css';
@@ -33,7 +31,6 @@ const calculateTaktMetrics = async (data) => {
   try {
     console.log('Calculating takt metrics for data:', data);
 
-    // Validate input data
     if (!data.product) {
       console.error('Missing product name in data');
       return {
@@ -46,10 +43,8 @@ const calculateTaktMetrics = async (data) => {
       };
     }
 
-    // Normalize product name (trim whitespace)
     const normalizedProduct = data.product.trim();
 
-    // Fetch product takt time from product_master_list table
     const { data: productData, error: productError } = await supabase
       .from('product_master_list')
       .select('current_takt')
@@ -70,7 +65,6 @@ const calculateTaktMetrics = async (data) => {
     const takt_time = productData.current_takt || 0;
     console.log('Fetched takt_time:', takt_time);
 
-    // Fetch employee pace from employee_pace table
     const employeeCount = data.employee_count != null ? Math.floor(Number(data.employee_count)) : null;
     if (employeeCount == null || isNaN(employeeCount) || employeeCount < 1) {
       console.error('Invalid employee_count:', data.employee_count);
@@ -78,7 +72,7 @@ const calculateTaktMetrics = async (data) => {
         total_time: 0,
         takt_time: 0,
         running_takt: 0,
-        target_units:0,
+        target_units: 0,
         target_delta: 0,
         delta_percentage: 0,
       };
@@ -102,8 +96,7 @@ const calculateTaktMetrics = async (data) => {
       };
     }
     let employee_percentage = employeeData.percentage || 1;
-    // Ensure percentage is a multiplier (e.g., 1.10 for 110%)
-    if (employee_percentage > 5) { // Likely stored as 110 instead of 1.10
+    if (employee_percentage > 5) {
       employee_percentage = employee_percentage / 100;
     }
     if (employee_percentage < 0.5 || employee_percentage > 2.0) {
@@ -112,7 +105,6 @@ const calculateTaktMetrics = async (data) => {
     }
     console.log('Fetched employee_percentage:', employee_percentage);
 
-    // Total Time: (End Time - Start Time) in seconds
     let total_time = 0;
     if (data.start_time && data.end_time) {
       const start = to24HourFormat(data.start_time);
@@ -120,24 +112,20 @@ const calculateTaktMetrics = async (data) => {
       const startDate = new Date(`1970-01-01T${start}:00`);
       const endDate = new Date(`1970-01-01T${end}:00`);
       total_time = ((endDate - startDate) / 1000) % (24 * 3600);
-      if (total_time < 0) total_time += 24 * 3600; // Handle overnight shifts
+      if (total_time < 0) total_time += 24 * 3600;
     }
     console.log('Calculated total_time:', total_time);
 
-    // Running Takt: Takt Time * Employee Pace Percentage
     const running_takt = takt_time ? takt_time * employee_percentage : 0;
     console.log('Calculated running_takt:', running_takt);
 
-    // Target Units: (Total Time / Running Takt) if not WIP, rounded to 3 significant digits then to nearest integer
     let target_units = data.product_status === 'WIP' ? 0 : running_takt ? (total_time / running_takt) : 0;
     target_units = running_takt ? Math.round(roundToSignificantDigits(target_units, 3)) : 0;
     console.log('Calculated target_units:', target_units);
 
-    // Target Delta: Actual Units - Target Units
     const target_delta = data.actual_units && target_units != null ? data.actual_units - target_units : 0;
     console.log('Calculated target_delta:', target_delta);
 
-    // Delta Percentage: Actual Units / Target Units
     const delta_percentage = target_units ? data.actual_units / target_units : 0;
     console.log('Calculated delta_percentage:', delta_percentage);
 
@@ -240,20 +228,18 @@ const Dashboard = ({ onLogout }) => {
 
     fetchProducts();
     fetchTableData();
-    focusElement(batchNumberInputRef); // Focus batch number input on mount
+    focusElement(batchNumberInputRef);
   }, [fetchTableData]);
 
-  // Auto-refresh every 5 minutes
-  const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // Only refresh if no modal is open and no input is focused
       if (!showBatchUpdate && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
         fetchTableData();
       }
     }, AUTO_REFRESH_INTERVAL);
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
+    return () => clearInterval(intervalId);
   }, [fetchTableData, showBatchUpdate]);
 
   const handleSubmit = async () => {
@@ -325,7 +311,7 @@ const Dashboard = ({ onLogout }) => {
     setBatchNumber('');
     setProduct('');
     setPackingFormat('');
-    focusElement(batchNumberInputRef); // Focus batch number input after clearing
+    focusElement(batchNumberInputRef);
   };
 
   const handleRowDoubleClick = (row) => {
@@ -399,10 +385,8 @@ const Dashboard = ({ onLogout }) => {
         setCurrentPage(1);
         setPageInput(1);
         await fetchTableData();
-        focusElement(batchNumberInputRef); // Restore focus after deletion
-        // Ensure Electron window is focused
-        const { ipcRenderer } = window.require('electron');
-        ipcRenderer.send('focus-window');
+        focusElement(batchNumberInputRef);
+        window.electronAPI.focusWindow();
       } catch (error) {
         console.error('Error deleting batch:', error);
         alert(`Failed to delete batch: ${error.message}`);
@@ -467,7 +451,6 @@ const Dashboard = ({ onLogout }) => {
     </div>
   );
 
-  // Utility to focus an element
   const focusElement = (ref) => {
     if (ref.current) {
       ref.current.focus();
@@ -563,4 +546,8 @@ const Dashboard = ({ onLogout }) => {
           onUpdate={handleBatchUpdate}
         />
       )}
-    inaccurate or missing information about Electron focus handling
+    </div>
+  );
+};
+
+export default Dashboard;
