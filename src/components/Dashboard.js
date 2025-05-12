@@ -84,7 +84,7 @@ const calculateTaktMetrics = async (data) => {
       .eq('employees', employeeCount)
       .single();
 
-    if (employeeError || !employeeData) {
+    if (employeeError || !productData) {
       console.error('Error fetching employee pace:', employeeError, 'Employee count:', employeeCount);
       return {
         total_time: 0,
@@ -162,6 +162,8 @@ const Dashboard = ({ onLogout }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(250);
   const [pageInput, setPageInput] = useState(currentPage);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteBatchId, setDeleteBatchId] = useState(null);
   const batchNumberInputRef = useRef(null);
 
   const line = localStorage.getItem('line') || '';
@@ -199,7 +201,6 @@ const Dashboard = ({ onLogout }) => {
       alert('Failed to fetch table data. Check your Supabase connection.');
       setTableData([]);
       setTotalRows(0);
-      // Re-focus input after alert
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   }, [currentPage, rowsPerPage]);
@@ -225,7 +226,6 @@ const Dashboard = ({ onLogout }) => {
           { id: 2, product_name: 'SEL Rosin Concentrate' },
           { id: 3, product_name: 'Plant Precision FL Relieve Gel' }
         ]);
-        // Re-focus input after alert
         requestAnimationFrame(() => focusElement(batchNumberInputRef));
       }
     };
@@ -238,18 +238,17 @@ const Dashboard = ({ onLogout }) => {
   const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000;
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (!showBatchUpdate && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
+      if (!showBatchUpdate && !showDeleteConfirm && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
         fetchTableData();
       }
     }, AUTO_REFRESH_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [fetchTableData, showBatchUpdate]);
+  }, [fetchTableData, showBatchUpdate, showDeleteConfirm]);
 
   const handleSubmit = async () => {
     if (!allFieldsFilled) {
       alert('Please fill in all fields.');
-      // Re-focus input after alert
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
       return;
     }
@@ -310,7 +309,6 @@ const Dashboard = ({ onLogout }) => {
     } catch (error) {
       console.error('Error submitting batch details:', error);
       alert(`Failed to submit batch details: ${error.message}`);
-      // Re-focus input after alert
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
@@ -331,7 +329,6 @@ const Dashboard = ({ onLogout }) => {
 
     if (isLocked && !withinGracePeriod) {
       alert('This batch is locked and cannot be edited (grace period expired).');
-      // Re-focus input after alert
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
       return;
     }
@@ -385,56 +382,64 @@ const Dashboard = ({ onLogout }) => {
       setPageInput(1);
       await fetchTableData();
       setShowBatchUpdate(false);
-      // Re-focus input after update
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     } catch (error) {
       console.error('Error updating batch details:', error);
       alert(`Failed to update batch details: ${error.message}`);
-      // Re-focus input after alert
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
 
   const handleBatchDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this batch?')) {
-      try {
-        const { error } = await supabase
-          .from('batch_data')
-          .delete()
-          .eq('id', id)
-          .eq('is_locked', false);
+    setDeleteBatchId(id);
+    setShowDeleteConfirm(true);
+  };
 
-        if (error) {
-          throw new Error(`Failed to delete batch: ${error.message}`);
-        }
+  const confirmDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('batch_data')
+        .delete()
+        .eq('id', deleteBatchId)
+        .eq('is_locked', false);
 
-        setCurrentPage(1);
-        setPageInput(1);
-        await fetchTableData();
-        // Focus input after deletion with retry mechanism
-        requestAnimationFrame(() => {
-          focusElement(batchNumberInputRef);
-          // Retry focus after a short delay to ensure DOM stability
-          setTimeout(() => focusElement(batchNumberInputRef), 100);
-        });
-        // Ensure Electron window is focused
-        if (window.electronAPI && window.electronAPI.focusWindow) {
-          window.electronAPI.focusWindow();
-        }
-      } catch (error) {
-        console.error('Error deleting batch:', error);
-        console.error('Failed to delete batch:', error.message);
-        // Focus input after error with retry
-        requestAnimationFrame(() => {
-          focusElement(batchNumberInputRef);
-          setTimeout(() => focusElement(batchNumberInputRef), 100);
-        });
-        // Attempt window focus in Electron
-        if (window.electronAPI && window.electronAPI.focusWindow) {
-          window.electronAPI.focusWindow();
-        }
+      if (error) {
+        throw new Error(`Failed to delete batch: ${error.message}`);
+      }
+
+      setCurrentPage(1);
+      setPageInput(1);
+      await fetchTableData();
+      setShowDeleteConfirm(false);
+      // Focus input after deletion with retry
+      requestAnimationFrame(() => {
+        focusElement(batchNumberInputRef);
+        setTimeout(() => focusElement(batchNumberInputRef), 100);
+      });
+      // Ensure Electron window is focused
+      if (window.electronAPI && window.electronAPI.focusWindow) {
+        window.electronAPI.focusWindow();
+      }
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      console.error('Failed to delete batch:', error.message);
+      setShowDeleteConfirm(false);
+      // Focus input after error
+      requestAnimationFrame(() => {
+        focusElement(batchNumberInputRef);
+        setTimeout(() => focusElement(batchNumberInputRef), 100);
+      });
+      // Attempt window focus
+      if (window.electronAPI && window.electronAPI.focusWindow) {
+        window.electronAPI.focusWindow();
       }
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    // Re-focus input after canceling
+    requestAnimationFrame(() => focusElement(batchNumberInputRef));
   };
 
   const totalPages = Math.ceil(totalRows / rowsPerPage);
@@ -444,7 +449,6 @@ const Dashboard = ({ onLogout }) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
     setPageInput(1);
-    // Re-focus input after pagination change
     requestAnimationFrame(() => focusElement(batchNumberInputRef));
   };
 
@@ -452,7 +456,6 @@ const Dashboard = ({ onLogout }) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setPageInput(page);
-      // Re-focus input after page change
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
@@ -468,7 +471,6 @@ const Dashboard = ({ onLogout }) => {
       goToPage(page);
     } else {
       setPageInput(currentPage);
-      // Re-focus input after invalid jump
       requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
@@ -502,19 +504,18 @@ const Dashboard = ({ onLogout }) => {
 
   const focusElement = (ref) => {
     if (ref.current) {
-      // Use requestAnimationFrame for reliable focus
       requestAnimationFrame(() => {
-        // Blur active element to clear any stuck focus
         if (document.activeElement !== ref.current) {
+          console.log('Blurring active element:', document.activeElement);
           document.activeElement.blur();
         }
         ref.current.focus();
-        // Verify focus
+        console.log('Focus set to:', document.activeElement);
         if (document.activeElement !== ref.current) {
           console.log('Focus failed, retrying...');
           ref.current.focus();
+          console.log('Retry focus set to:', document.activeElement);
         }
-        console.log('Focused batchNumberInput:', document.activeElement);
       });
     } else {
       console.log('batchNumberInputRef is null');
@@ -606,9 +607,42 @@ const Dashboard = ({ onLogout }) => {
       {showBatchUpdate && (
         <BatchNumberUpdate
           row={selectedRow}
-          onClose={() => setShowBatchUpdate(false)}
+          onClose={() => {
+            setShowBatchUpdate(false);
+            requestAnimationFrame(() => focusElement(batchNumberInputRef));
+          }}
           onUpdate={handleBatchUpdate}
         />
+      )}
+      {showDeleteConfirm && (
+        <div className="delete-confirm-modal" style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'white',
+          padding: '20px',
+          borderRadius: '5px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          zIndex: 1000
+        }}>
+          <h3>Confirm Deletion</h3>
+          <p>Are you sure you want to delete this batch?</p>
+          <div style={{ marginTop: '20px', textAlign: 'right' }}>
+            <button
+              onClick={confirmDelete}
+              style={{ marginRight: '10px', padding: '5px 10px' }}
+            >
+              Yes
+            </button>
+            <button
+              onClick={cancelDelete}
+              style={{ padding: '5px 10px' }}
+            >
+              No
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
