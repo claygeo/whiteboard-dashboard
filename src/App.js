@@ -33,19 +33,30 @@ const App = () => {
     localStorage.removeItem('lineLead');
     setIsAuthenticated(false);
     navigate('/', { replace: true });
-  }, [navigate]);
+  }, []); // Empty dependency array to run only on mount
 
   useEffect(() => {
     const logActiveElement = () => {
       console.log('Active element:', document.activeElement);
     };
 
+    const handleWindowFocus = () => {
+      console.log('Window gained focus');
+      const input = document.getElementById('batchNumberInput');
+      if (input) {
+        input.focus();
+        console.log('Forced focus on batchNumberInput:', document.activeElement);
+      }
+    };
+
     window.addEventListener('focusin', logActiveElement);
     window.addEventListener('click', logActiveElement);
+    window.addEventListener('focus', handleWindowFocus);
 
     return () => {
       window.removeEventListener('focusin', logActiveElement);
       window.removeEventListener('click', logActiveElement);
+      window.removeEventListener('focus', handleWindowFocus);
     };
   }, []);
 
