@@ -7,8 +7,15 @@ const Login = ({ onAuthChange }) => {
     const [lineLead, setLineLead] = useState('');
     const navigate = useNavigate();
 
-    const lines = ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5', 'Line 6', 'Line 7', 'Line 8', 'Line 9', 'Line 10', 'Admin'];
-    const lineLeads = ['Susana Cebalos', 'Lay Blanco', 'Ana Fernandez', 'Belkis Carballo', 'Delia Da Silva', 'Yanet Pesqueria'];
+    const lines = [
+        'Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5', 'Line 6', 'Line 7', 'Line 8',
+        'Line 9', 'Line 10', 'Line 11', 'Line 12', 'Line 13', 'Line 14', 'Line 15', 'Line 16'
+    ];
+    const lineLeads = [
+        'Abelardo Podriguez', 'Adolfo Valdes', 'Belkis Carballo', 'Delia Da Silva', 'Dora Garza',
+        'Lay Blanco', 'Lester Igarza', 'Maria Mendez', 'Samantha Perez-Morell', 'Susana Ceballos',
+        'Yanet Pesqueria'
+    ];
 
     const handleLogin = () => {
         if (line && lineLead) {
@@ -16,10 +23,10 @@ const Login = ({ onAuthChange }) => {
             localStorage.setItem('lineLead', lineLead);
             console.log('Login successful, navigating to /dashboard');
             onAuthChange();
-            // Add a small delay to ensure state updates before navigation
-            setTimeout(() => {
-                navigate('/dashboard', { replace: true });
-            }, 100);
+            navigate('/dashboard', { replace: true });
+            // Ensure Electron window is focused
+            const { ipcRenderer } = window.require('electron');
+            ipcRenderer.send('focus-window');
         } else {
             alert('Please select both Line and Line Lead.');
         }

@@ -80,7 +80,7 @@
 .dashboard .form-group input,
 .dashboard .form-group select {
     flex: 1;
-    padding: 4px; /* 4px on all sides */
+    padding: 4px;
     background-color: #fff;
     color: #333;
     border: 1px solid #999;
@@ -89,7 +89,7 @@
     font-family: 'MS Sans Serif', Arial, sans-serif;
     height: 28px;
     box-sizing: border-box;
-    line-height: 20px; /* Center text within the 20px content area (28px - 4px top - 4px bottom) */
+    line-height: 20px;
 }
 
 .dashboard .form-group select {
@@ -348,14 +348,6 @@
     background-color: #008c42;
 }
 
-.batch-update-container .delete-button {
-    background-color: #d9534f;
-}
-
-.batch-update-container .delete-button:hover {
-    background-color: #c9302c;
-}
-
 .batch-update-container .curaleaf-logo {
     width: 100px;
     margin: 0 auto 15px;
@@ -469,18 +461,16 @@
     border: 1px solid #999;
 }
 
-/* Ensure ProductSelector stretches to match other inputs */
 .dashboard .form-group .product-selector-container {
-    flex: 1; /* Stretch to fill available space */
-    width: 100%; /* Ensure full width */
+    flex: 1;
+    width: 100%;
 }
 
-/* Override react-select styles to match the centering approach */
 .dashboard .form-group .react-select__control {
-    padding: 4px; /* Match padding of other inputs */
+    padding: 4px;
     height: 28px;
     min-height: 28px;
-    width: 100%; /* Ensure it takes the full width of the container */
+    width: 100%;
     box-sizing: border-box;
     border: 1px solid #999;
     border-radius: 2px;
@@ -495,14 +485,14 @@
 }
 
 .dashboard .form-group .react-select__value-container {
-    padding: 0 4px; /* Match the padding of other inputs */
-    height: 20px; /* Match the content area (28px - 4px top - 4px bottom) */
+    padding: 0 4px;
+    height: 20px;
 }
 
 .dashboard .form-group .react-select__input-container {
     margin: 0;
     padding: 0;
-    height: 20px; /* Match value-container height */
+    height: 20px;
 }
 
 .dashboard .form-group .react-select__input {
@@ -515,37 +505,42 @@
 .dashboard .form-group .react-select__single-value {
     margin: 0;
     padding: 0;
-    line-height: 20px; /* Match the content area to center the text */
+    line-height: 20px;
 }
 
 .dashboard .form-group .react-select__placeholder {
     margin: 0;
     padding: 0;
-    line-height: 20px; /* Match the content area to center the placeholder */
+    line-height: 20px;
 }
 
 .dashboard .form-group .react-select__dropdown-indicator,
 .dashboard .form-group .react-select__clear-indicator {
-    padding: 0; /* Remove padding to center icons */
-    height: 20px; /* Match the content area */
-    width: 20px; /* Ensure consistent width for icons */
+    padding: 0;
+    height: 20px;
+    width: 20px;
     display: flex;
-    align-items: center; /* Vertically center the icons */
-    justify-content: center; /* Horizontally center the icons */
+    align-items: center;
+    justify-content: center;
 }
 
 .dashboard .form-group .react-select__dropdown-indicator {
     background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
     background-repeat: no-repeat;
-    background-position: center; /* Center the caret */
-    padding-right: 0; /* Remove extra padding */
+    background-position: center;
+    padding-right: 0;
 }
 
 .dashboard .form-group .react-select__dropdown-indicator svg {
-    display: none; /* Hide the default react-select caret */
+    display: none;
 }
 
 .dashboard .form-group .react-select__clear-indicator svg {
-    width: 16px; /* Match the new caret size */
+    width: 16px;
     height: 16px;
+}
+
+.locked-row {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
 }

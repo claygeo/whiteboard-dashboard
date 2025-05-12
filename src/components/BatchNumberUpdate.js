@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
+import FocusTrap from 'focus-trap-react';
+import { supabase } from './supabaseClient';
 
 // Function to generate time options from 6:00 AM to 9:45 PM in 15-minute intervals
 const generateTimeOptions = () => {
   const times = [];
-  const startHour = 6; // 6:00 AM
-  const endHour = 21; // 9:00 PM (21:00 in 24-hour format)
+  const startHour = 6;
+  const endHour = 21;
 
   for (let hour = startHour; hour <= endHour; hour++) {
     for (let minute = 0; minute < 60; minute += 15) {
@@ -52,7 +54,7 @@ const to24HourFormat = (time12Hour) => {
   return `${hours.toString().padStart(2, '0')}:${minutes}`;
 };
 
-const BatchNumberUpdate = ({ row, onClose, onUpdate, onDelete }) => {
+const BatchNumberUpdate = ({ row, onClose, onUpdate }) => {
   const [productStatus, setProductStatus] = useState(row.product_status || '');
   const [startTime, setStartTime] = useState(normalizeTimeFormat(row.start_time) || '');
   const [endTime, setEndTime] = useState(normalizeTimeFormat(row.end_time) || '');
@@ -69,13 +71,13 @@ const BatchNumberUpdate = ({ row, onClose, onUpdate, onDelete }) => {
 
     const startTime24 = to24HourFormat(startTime);
     const startDate = new Date(`1970-01-01T${startTime24}:00`);
-    const oneHourLater = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
+    const oneHourLater = new Date(startDate.getTime() + 60 * 60 * 1000);
 
     return timeOptions.filter(option => {
       const endTime24 = to24HourFormat(option.value);
       const endDate = new Date(`1970-01-01T${endTime24}:00`);
 
-      const timeDiff = (endDate - startDate) / (1000 * 60); // difference in minutes
+      const timeDiff = (endDate - startDate) / (1000 * 60);
       return timeDiff > 0 && timeDiff <= 60;
     });
   };
@@ -105,33 +107,12 @@ const BatchNumberUpdate = ({ row, onClose, onUpdate, onDelete }) => {
         end_time: endTime || null,
         employee_count: employeeCount ? parseInt(employeeCount) : null,
         actual_units: parseInt(actualUnits) || 0,
-        product: row.product // Include product name
+        product: row.product
       });
       setIsClosing(true);
     } catch (error) {
       console.error('Error submitting update:', error);
       setErrors({ submit: 'Failed to submit. Please try again.' });
-    }
-  };
-
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this batch?')) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/batch-details/${row.id}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to delete batch: ${errorText} (${response.status})`);
-        }
-
-        onDelete(row.id);
-        setIsClosing(true);
-      } catch (error) {
-        console.error('Error deleting batch:', error);
-        alert('Failed to delete batch. Please try again.');
-      }
     }
   };
 
@@ -148,133 +129,134 @@ const BatchNumberUpdate = ({ row, onClose, onUpdate, onDelete }) => {
   const handleStartTimeChange = (e) => {
     const newStartTime = e.target.value;
     setStartTime(newStartTime);
-    setEndTime(''); // Reset end time when start time changes
+    setEndTime('');
     setErrors(prev => ({ ...prev, startTime: null }));
   };
 
   return (
-    <div
-      className={`batch-update-container ${isClosing ? 'fade-out' : ''}`}
-      style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 1000,
-      }}
-      onAnimationEnd={handleAnimationEnd}
-      ref={popupRef}
-    >
-      <div className="popup-header">
-        <img src="/assets/curaleaf.png" alt="Curaleaf Logo" className="curaleaf-logo" />
-        <h3>Batch Number Update</h3>
+    <FocusTrap>
+      <div
+        className={`batch-update-container ${isClosing ? 'fade-out' : ''}`}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1000,
+        }}
+        onAnimationEnd={handleAnimationEnd}
+        ref={popupRef}
+        role="dialog"
+        aria-labelledby="batch-update-title"
+      >
+        <div className="popup-header">
+          <img src="/assets/curaleaf.png" alt="Curaleaf Logo" className="curaleaf-logo" />
+          <h3 id="batch-update-title">Batch Number Update</h3>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Batch Number:</label>
+            <input type="text" value={row.batch_number || 'N/A'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Line:</label>
+            <input type="text" value={row.line || 'N/A'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Product:</label>
+            <input type="text" value={row.product || 'N/A'} readOnly />
+          </div>
+          <div className="form-group">
+            <label>Product Status:</label>
+            <select
+              value={productStatus}
+              onChange={(e) => {
+                setProductStatus(e.target.value);
+                setErrors(prev => ({ ...prev, productStatus: null }));
+              }}
+            >
+              <option value="">Select Status</option>
+              <option value="Finished Goods">Finished Goods</option>
+              <option value="Machine Down">Machine Down</option>
+              <option value="WIP">WIP</option>
+            </select>
+            {errors.productStatus && <span className="error">{errors.productStatus}</span>}
+          </div>
+          <div className="form-group">
+            <label>Start Time:</label>
+            <select
+              value={startTime}
+              onChange={handleStartTimeChange}
+            >
+              <option value="">Select Start Time</option>
+              {timeOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {errors.startTime && <span className="error">{errors.startTime}</span>}
+          </div>
+          <div className="form-group">
+            <label>End Time:</label>
+            <select
+              value={endTime}
+              onChange={(e) => {
+                setEndTime(e.target.value);
+                setErrors(prev => ({ ...prev, endTime: null }));
+              }}
+              disabled={!startTime}
+            >
+              <option value="">Select End Time</option>
+              {getEndTimeOptions().map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {errors.endTime && <span className="error">{errors.endTime}</span>}
+          </div>
+          <div className="form-group">
+            <label>Employee Count:</label>
+            <select
+              value={employeeCount}
+              onChange={(e) => {
+                setEmployeeCount(e.target.value);
+                setErrors(prev => ({ ...prev, employeeCount: null }));
+              }}
+            >
+              <option value="">Select Count</option>
+              {[...Array(5).keys()].map(i => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            {errors.employeeCount && <span className="error">{errors.employeeCount}</span>}
+          </div>
+          <div className="form-group">
+            <label>Actual Units Packed:</label>
+            <input
+              type="number"
+              value={actualUnits}
+              onChange={(e) => {
+                setActualUnits(e.target.value);
+                setErrors(prev => ({ ...prev, actualUnits: null }));
+              }}
+              min="0"
+            />
+            {errors.actualUnits && <span className="error">{errors.actualUnits}</span>}
+          </div>
+          {errors.submit && <span className="error">{errors.submit}</span>}
+          <div className="form-group buttons">
+            <button type="submit">Submit</button>
+            <button type="button" onClick={handleClose}>
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Batch Number:</label>
-          <input type="text" value={row.batch_number || 'N/A'} readOnly />
-        </div>
-        <div className="form-group">
-          <label>Line:</label>
-          <input type="text" value={row.line || 'N/A'} readOnly />
-        </div>
-        <div className="form-group">
-          <label>Product:</label>
-          <input type="text" value={row.product || 'N/A'} readOnly />
-        </div>
-        <div className="form-group">
-          <label>Product Status:</label>
-          <select
-            value={productStatus}
-            onChange={(e) => {
-              setProductStatus(e.target.value);
-              setErrors(prev => ({ ...prev, productStatus: null }));
-            }}
-          >
-            <option value="">Select Status</option>
-            <option value="Finished Goods">Finished Goods</option>
-            <option value="Machine Down">Machine Down</option>
-            <option value="WIP">WIP</option>
-          </select>
-          {errors.productStatus && <span className="error">{errors.productStatus}</span>}
-        </div>
-        <div className="form-group">
-          <label>Start Time:</label>
-          <select
-            value={startTime}
-            onChange={handleStartTimeChange}
-          >
-            <option value="">Select Start Time</option>
-            {timeOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {errors.startTime && <span className="error">{errors.startTime}</span>}
-        </div>
-        <div className="form-group">
-          <label>End Time:</label>
-          <select
-            value={endTime}
-            onChange={(e) => {
-              setEndTime(e.target.value);
-              setErrors(prev => ({ ...prev, endTime: null }));
-            }}
-            disabled={!startTime}
-          >
-            <option value="">Select End Time</option>
-            {getEndTimeOptions().map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {errors.endTime && <span className="error">{errors.endTime}</span>}
-        </div>
-        <div className="form-group">
-          <label>Employee Count:</label>
-          <select
-            value={employeeCount}
-            onChange={(e) => {
-              setEmployeeCount(e.target.value);
-              setErrors(prev => ({ ...prev, employeeCount: null }));
-            }}
-          >
-            <option value="">Select Count</option>
-            {[...Array(5).keys()].map(i => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
-          {errors.employeeCount && <span className="error">{errors.employeeCount}</span>}
-        </div>
-        <div className="form-group">
-          <label>Actual Units Packed:</label>
-          <input
-            type="number"
-            value={actualUnits}
-            onChange={(e) => {
-              setActualUnits(e.target.value);
-              setErrors(prev => ({ ...prev, actualUnits: null }));
-            }}
-            min="0"
-          />
-          {errors.actualUnits && <span className="error">{errors.actualUnits}</span>}
-        </div>
-        {errors.submit && <span className="error">{errors.submit}</span>}
-        <div className="form-group buttons">
-          <button type="submit">Submit</button>
-          <button type="button" onClick={handleDelete} className="delete-button">
-            Delete
-          </button>
-          <button type="button" onClick={handleClose}>
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+    </FocusTrap>
   );
 };
 

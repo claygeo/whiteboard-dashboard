@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DataTable from './DataTable';
 import BatchNumberUpdate from './BatchNumberUpdate';
-import ProductSelector from './ProductSelector';
+import Product
+
+Selector from './ProductSelector';
 import { supabase } from './supabaseClient';
 import { format, toZonedTime } from 'date-fns-tz';
 import '../styles/Dashboard.css';
@@ -76,7 +78,7 @@ const calculateTaktMetrics = async (data) => {
         total_time: 0,
         takt_time: 0,
         running_takt: 0,
-        target_units: 0,
+        target_units:0,
         target_delta: 0,
         delta_percentage: 0,
       };
@@ -172,6 +174,7 @@ const Dashboard = ({ onLogout }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(250);
   const [pageInput, setPageInput] = useState(currentPage);
+  const batchNumberInputRef = useRef(null);
 
   const line = localStorage.getItem('line') || '';
   const lineLead = localStorage.getItem('lineLead') || '';
@@ -191,10 +194,9 @@ const Dashboard = ({ onLogout }) => {
       const from = (currentPage - 1) * rowsPerPage;
       const to = from + rowsPerPage - 1;
 
-      // Fetch data with pagination
       const { data, error, count } = await supabase
         .from('batch_data')
-        .select('*', { count: 'exact' })
+        .select('*, is_locked, line_status', { count: 'exact' })
         .range(from, to)
         .order('created_at', { ascending: false });
 
@@ -238,7 +240,21 @@ const Dashboard = ({ onLogout }) => {
 
     fetchProducts();
     fetchTableData();
+    focusElement(batchNumberInputRef); // Focus batch number input on mount
   }, [fetchTableData]);
+
+  // Auto-refresh every 5 minutes
+  const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      // Only refresh if no modal is open and no input is focused
+      if (!showBatchUpdate && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
+        fetchTableData();
+      }
+    }, AUTO_REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, [fetchTableData, showBatchUpdate]);
 
   const handleSubmit = async () => {
     if (!allFieldsFilled) {
@@ -246,25 +262,18 @@ const Dashboard = ({ onLogout }) => {
       return;
     }
 
-    // Get the current time in EST
     const now = new Date();
-    const estTime = toZonedTime(now, 'America/New_York'); // Converts UTC to EST/EDT (handles DST)
-
-    // Format the submission time in 12-hour format (e.g., "02:30 PM")
+    const estTime = toZonedTime(now, 'America/New_York');
     const submissionTime = format(estTime, 'hh:mm a');
-
-    // Determine the shift based on EST time
-    const estHour = estTime.getHours(); // 0-23 (24-hour format)
+    const estHour = estTime.getHours();
     let shift;
     if (estHour >= 6 && estHour < 14) {
-      shift = 'Morning'; // 6 AM - 2 PM
+      shift = 'Morning';
     } else if (estHour >= 14 && estHour < 22) {
-      shift = 'Afternoon'; // 2 PM - 10 PM
+      shift = 'Afternoon';
     } else {
-      shift = 'Evening'; // 10 PM - 6 AM
+      shift = 'Evening';
     }
-
-    // Get the effective date in EST (YYYY-MM-DD)
     const effectiveDate = format(estTime, 'yyyy-MM-dd');
 
     const newData = {
@@ -286,9 +295,11 @@ const Dashboard = ({ onLogout }) => {
       running_takt: 0,
       target_delta: 0,
       delta_percentage: 0,
-      submission_time: submissionTime, // Formatted time in EST (12-hour format)
-      shift: shift, // Determined shift
-      effective_date: effectiveDate // Submission date in EST
+      submission_time: submissionTime,
+      shift: shift,
+      effective_date: effectiveDate,
+      is_locked: false,
+      line_status: 'Open'
     };
 
     try {
@@ -300,7 +311,6 @@ const Dashboard = ({ onLogout }) => {
         throw new Error(`Failed to submit batch details: ${error.message}`);
       }
 
-      // Reset to page 1 and refresh data
       setCurrentPage(1);
       setPageInput(1);
       await fetchTableData();
@@ -315,6 +325,7 @@ const Dashboard = ({ onLogout }) => {
     setBatchNumber('');
     setProduct('');
     setPackingFormat('');
+    focusElement(batchNumberInputRef); // Focus batch number input after clearing
   };
 
   const handleRowDoubleClick = (row) => {
@@ -329,7 +340,6 @@ const Dashboard = ({ onLogout }) => {
         throw new Error('Invalid batch ID');
       }
 
-      // Calculate takt-time metrics
       const calculations = await calculateTaktMetrics({
         product_status: updatedData.product_status,
         start_time: updatedData.start_time,
@@ -353,7 +363,9 @@ const Dashboard = ({ onLogout }) => {
           running_takt: calculations.running_takt,
           target_units: calculations.target_units,
           target_delta: calculations.target_delta,
-          delta_percentage: calculations.delta_percentage
+          delta_percentage: calculations.delta_percentage,
+          is_locked: true,
+          line_status: 'Closed'
         })
         .eq('id', id);
 
@@ -372,22 +384,29 @@ const Dashboard = ({ onLogout }) => {
   };
 
   const handleBatchDelete = async (id) => {
-    try {
-      const { error } = await supabase
-        .from('batch_data')
-        .delete()
-        .eq('id', id);
+    if (window.confirm('Are you sure you want to delete this batch?')) {
+      try {
+        const { error } = await supabase
+          .from('batch_data')
+          .delete()
+          .eq('id', id)
+          .eq('is_locked', false);
 
-      if (error) {
-        throw new Error(`Failed to delete batch: ${error.message}`);
+        if (error) {
+          throw new Error(`Failed to delete batch: ${error.message}`);
+        }
+
+        setCurrentPage(1);
+        setPageInput(1);
+        await fetchTableData();
+        focusElement(batchNumberInputRef); // Restore focus after deletion
+        // Ensure Electron window is focused
+        const { ipcRenderer } = window.require('electron');
+        ipcRenderer.send('focus-window');
+      } catch (error) {
+        console.error('Error deleting batch:', error);
+        alert(`Failed to delete batch: ${error.message}`);
       }
-
-      setCurrentPage(1);
-      setPageInput(1);
-      await fetchTableData();
-    } catch (error) {
-      console.error('Error deleting batch:', error);
-      alert(`Failed to delete batch: ${error.message}`);
     }
   };
 
@@ -448,6 +467,13 @@ const Dashboard = ({ onLogout }) => {
     </div>
   );
 
+  // Utility to focus an element
+  const focusElement = (ref) => {
+    if (ref.current) {
+      ref.current.focus();
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -482,7 +508,13 @@ const Dashboard = ({ onLogout }) => {
           </div>
           <div className="form-group">
             <label className="form-label">Batch Number:</label>
-            <input type="text" value={batchNumber} onChange={(e) => setBatchNumber(e.target.value)} />
+            <input
+              type="text"
+              value={batchNumber}
+              onChange={(e) => setBatchNumber(e.target.value)}
+              ref={batchNumberInputRef}
+              id="batchNumberInput"
+            />
           </div>
           <div className="form-group">
             <label className="form-label">Product:</label>
@@ -498,14 +530,21 @@ const Dashboard = ({ onLogout }) => {
             <label className="form-label">Packing Format:</label>
             <select value={packingFormat} onChange={(e) => setPackingFormat(e.target.value)}>
               <option value="">Select Packing Format</option>
-              <option value="Table Top - Parastaltic">Table Top - Parastaltic</option>
-              <option value="Table Top - Tablet Counter">Table Top - Tablet Counter</option>
-              <option value="Table Top - Scale">Table Top - Scale</option>
-              <option value="Table Top - Briq">Table Top - Briq</option>
-              <option value="Table Top - Disposable">Table Top - Disposable</option>
-              <option value="Xylem - 510 Vape">Xylem - 510 Vape</option>
+              <option value="Knock-Box">Knock-Box</option>
               <option value="Nexus">Nexus</option>
+              <option value="Pre-Roller">Pre-Roller</option>
               <option value="Table Top">Table Top</option>
+              <option value="Table Top - Briq">Table Top - Briq</option>
+              <option value="Table Top - Capsule Counter">Table Top - Capsule Counter</option>
+              <option value="Table Top - Disposable">Table Top - Disposable</option>
+              <option value="Table Top - Gel">Table Top - Gel</option>
+              <option value="Table Top - Go No Go Scale">Table Top - Go No Go Scale</option>
+              <option value="Table Top - Parastaltic">Table Top - Parastaltic</option>
+              <option value="Table Top - Scale">Table Top - Scale</option>
+              <option value="Table Top - Syringe">Table Top - Syringe</option>
+              <option value="Table Top - Tablet Counter">Table Top - Tablet Counter</option>
+              <option value="Xylem - 510 Vape">Xylem - 510 Vape</option>
+              <option value="Xylem - Jupiter Vape">Xylem - Jupiter Vape</option>
             </select>
           </div>
         </div>
@@ -514,6 +553,7 @@ const Dashboard = ({ onLogout }) => {
         onRowDoubleClick={handleRowDoubleClick}
         tableData={tableData}
         renderPagination={renderPagination}
+        onDelete={handleBatchDelete}
       />
       <div className="pagination-bottom">{renderPagination()}</div>
       {showBatchUpdate && (
@@ -521,11 +561,6 @@ const Dashboard = ({ onLogout }) => {
           row={selectedRow}
           onClose={() => setShowBatchUpdate(false)}
           onUpdate={handleBatchUpdate}
-          onDelete={handleBatchDelete}
         />
       )}
-    </div>
-  );
-};
-
-export default Dashboard;
+    inaccurate or missing information about Electron focus handling

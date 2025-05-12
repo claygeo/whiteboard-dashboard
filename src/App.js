@@ -18,12 +18,14 @@ const App = () => {
     };
 
     useEffect(() => {
-        // Clear localStorage on app start to force login
-        localStorage.removeItem('line');
-        localStorage.removeItem('lineLead');
-        setIsAuthenticated(false);
-        console.log('App.js: Cleared localStorage on start');
-        // Optionally, you can call checkAuth() after clearing, but it’s not necessary since we know it’s cleared
+        // Check authentication state on mount
+        checkAuth();
+        // Debug focus issues by logging active element
+        const handleFocusChange = () => {
+            console.log('Active element:', document.activeElement);
+        };
+        document.addEventListener('focusin', handleFocusChange);
+        return () => document.removeEventListener('focusin', handleFocusChange);
     }, []);
 
     const handleLogout = () => {
