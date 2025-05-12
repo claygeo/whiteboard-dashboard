@@ -33,7 +33,7 @@ Before setting up the project, ensure you have the following:
 Follow these steps to set up the project locally:
 
 1. Clone the Repository:
-git clone https://github.com/claygeo/whiteboard-dashboard.gt
+git clone https://github.com/claygeo/whiteboard-dashboard.git
 
 2. Navigate to the Project Directory:
 cd whiteboard-project-frontend

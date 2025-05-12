@@ -22,12 +22,20 @@ function createWindow() {
   if (isDev) {
     url = 'http://localhost:3000';
   } else {
-    const filePath = path.join(__dirname, '../build/index.html');
-    // Verify file exists in production
+    // Try multiple paths for build/index.html
+    let filePath = path.join(__dirname, '../build/index.html');
     if (!fs.existsSync(filePath)) {
-      console.error(`Production index.html not found at: ${filePath}`);
-      app.quit();
-      return;
+      console.warn(`index.html not found at: ${filePath}`);
+      // Alternative path: resources/app/build/
+      filePath = path.join(__dirname, '../../build/index.html');
+      if (!fs.existsSync(filePath)) {
+        console.error(`Production index.html not found at: ${filePath}`);
+        console.error('Current __dirname:', __dirname);
+        console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')));
+        console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')));
+        app.quit();
+        return;
+      }
     }
     url = `file://${filePath}`;
   }
@@ -39,9 +47,9 @@ function createWindow() {
     app.quit();
   });
 
-  // Open DevTools only in development
-  if (isDev) {
-    console.log('Opening DevTools in development mode');
+  // Open DevTools only in development or with --debug
+  if (isDev || process.argv.includes('--debug')) {
+    console.log('Opening DevTools');
     win.webContents.openDevTools();
   }
 

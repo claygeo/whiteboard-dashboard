@@ -1,10 +1,20 @@
-// craco.config.js
 module.exports = {
   webpack: {
-    configure: (webpackConfig) => {
-      webpackConfig.output.module = false;
-      webpackConfig.output.chunkFormat = 'commonjs';
-      return webpackConfig;
+    configure: {
+      // Ensure assets are copied correctly
     },
   },
+  plugins: [
+    {
+      plugin: require('craco-plugin-copy'),
+      options: {
+        copy: [
+          {
+            from: 'public/assets',
+            to: 'build/assets',
+          },
+        ],
+      },
+    },
+  ],
 };

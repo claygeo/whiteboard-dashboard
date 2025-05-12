@@ -1,8 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import './App.css';
+
+class ErrorBoundary extends Component {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error('ErrorBoundary caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div>
+          <h1>Something went wrong.</h1>
+          <p>{this.state.error?.message}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,27 +82,29 @@ const App = () => {
   }, []);
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={<Login onAuthChange={handleAuthChange} />}
-      />
-      <Route
-        path="/dashboard"
-        element={
-          isAuthenticated ? (
-            <Dashboard onLogout={() => {
-              localStorage.removeItem('line');
-              localStorage.removeItem('lineLead');
-              setIsAuthenticated(false);
-              navigate('/', { replace: true });
-            }} />
-          ) : (
-            <Login onAuthChange={handleAuthChange} />
-          )
-        }
-      />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route
+          path="/"
+          element={<Login onAuthChange={handleAuthChange} />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
+              <Dashboard onLogout={() => {
+                localStorage.removeItem('line');
+                localStorage.removeItem('lineLead');
+                setIsAuthenticated(false);
+                navigate('/', { replace: true });
+              }} />
+            ) : (
+              <Login onAuthChange={handleAuthChange} />
+            )
+          }
+        />
+      </Routes>
+    </ErrorBoundary>
   );
 };
 

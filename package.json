@@ -48,8 +48,7 @@
             "build/**/*",
             "public/electron.js",
             "public/preload.js",
-            "public/loading.html",
-            "build/assets/**/*"
+            "public/assets/**/*"
         ],
         "directories": {
             "buildResources": "assets",
