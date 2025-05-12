@@ -27,6 +27,7 @@ class ErrorBoundary extends Component {
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const checkAuth = () => {
@@ -48,13 +49,13 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Clear localStorage on app launch to enforce login
     console.log('Clearing localStorage on app launch');
     localStorage.removeItem('line');
     localStorage.removeItem('lineLead');
     setIsAuthenticated(false);
     navigate('/', { replace: true });
-  }, []); // Empty dependency array to run only on mount
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     const logActiveElement = () => {
@@ -81,6 +82,12 @@ const App = () => {
     };
   }, []);
 
+  console.log('App.js rendering, isLoading:', isLoading);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  console.log('Rendering Routes');
   return (
     <ErrorBoundary>
       <Routes>
@@ -92,12 +99,14 @@ const App = () => {
           path="/dashboard"
           element={
             isAuthenticated ? (
-              <Dashboard onLogout={() => {
-                localStorage.removeItem('line');
-                localStorage.removeItem('lineLead');
-                setIsAuthenticated(false);
-                navigate('/', { replace: true });
-              }} />
+              <Dashboard
+                onLogout={() => {
+                  localStorage.removeItem('line');
+                  localStorage.removeItem('lineLead');
+                  setIsAuthenticated(false);
+                  navigate('/', { replace: true });
+                }}
+              />
             ) : (
               <Login onAuthChange={handleAuthChange} />
             )

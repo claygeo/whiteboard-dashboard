@@ -14,15 +14,12 @@ function createWindow() {
     },
   });
 
-  // Maximize window
   win.maximize();
 
-  // Load the correct URL based on environment
   let url;
   if (isDev) {
     url = 'http://localhost:3000';
   } else {
-    // Verify preload.js exists
     const preloadPath = path.join(__dirname, 'preload.js');
     if (!fs.existsSync(preloadPath)) {
       console.error(`preload.js not found at: ${preloadPath}`);
@@ -30,16 +27,15 @@ function createWindow() {
       return;
     }
 
-    // Try primary path for build/index.html
-    const filePath = path.join(__dirname, '../build/index.html');
+    const filePath = path.join(app.getAppPath(), 'build', 'index.html');
+    console.log('Attempting to load:', filePath);
     if (!fs.existsSync(filePath)) {
       console.error(`Production index.html not found at: ${filePath}`);
       console.error('Current __dirname:', __dirname);
       console.error('App path:', app.getAppPath());
       try {
-        console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')) || []);
-        console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')) || []);
-        console.error('App path contents:', fs.readdirSync(app.getAppPath()) || []);
+        console.error('Root directory contents:', fs.readdirSync(path.dirname(app.getAppPath())) || []);
+        console.error('Build directory contents:', fs.readdirSync(path.join(app.getAppPath(), 'build')) || []);
       } catch (err) {
         console.error('Error reading directories:', err);
       }
@@ -56,25 +52,19 @@ function createWindow() {
     app.quit();
   });
 
-  // Open DevTools in development or with --debug
-  if (isDev || process.argv.includes('--debug')) {
-    console.log('Opening DevTools');
-    win.webContents.openDevTools();
-  }
+  console.log('Opening DevTools');
+  win.webContents.openDevTools();
 
-  // Handle window focus IPC
   ipcMain.on('focus-window', (event) => {
     if (win && !win.isFocused()) {
       win.focus();
     }
   });
 
-  // Log when page finishes loading
   win.webContents.on('did-finish-load', () => {
     console.log('Page finished loading:', url);
   });
 
-  // Log navigation failures
   win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
     console.error(`Failed to load ${validatedURL}: ${errorCode} - ${errorDescription}`);
   });
@@ -82,7 +72,6 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -96,7 +85,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-// Log errors during app initialization
 app.on('web-contents-created', (event, webContents) => {
   webContents.on('render-process-gone', (event, details) => {
     console.error('Renderer process crashed:', details);
