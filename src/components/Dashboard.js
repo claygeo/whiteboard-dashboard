@@ -184,7 +184,7 @@ const Dashboard = ({ onLogout }) => {
 
       const { data, error, count } = await supabase
         .from('batch_data')
-        .select('*, is_locked, line_status, submitted_at', { count: 'exact' }) // Added submitted_at
+        .select('*, is_locked, line_status, submitted_at', { count: 'exact' })
         .range(from, to)
         .order('created_at', { ascending: false });
 
@@ -304,6 +304,8 @@ const Dashboard = ({ onLogout }) => {
     } catch (error) {
       console.error('Error submitting batch details:', error);
       alert(`Failed to submit batch details: ${error.message}`);
+      // Re-focus input after alert [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
     }
   };
 
@@ -315,7 +317,6 @@ const Dashboard = ({ onLogout }) => {
   };
 
   const handleRowDoubleClick = (row) => {
-    // Check if batch is editable (not locked or within 5-minute grace period)
     const isLocked = row.is_locked;
     const submittedAt = row.submitted_at ? new Date(row.submitted_at) : null;
     const now = new Date();
@@ -324,6 +325,8 @@ const Dashboard = ({ onLogout }) => {
 
     if (isLocked && !withinGracePeriod) {
       alert('This batch is locked and cannot be edited (grace period expired).');
+      // Re-focus input after alert [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
       return;
     }
 
@@ -364,7 +367,7 @@ const Dashboard = ({ onLogout }) => {
           delta_percentage: calculations.delta_percentage,
           is_locked: true,
           line_status: 'Closed',
-          submitted_at: new Date().toISOString() // Set submitted_at on update
+          submitted_at: new Date().toISOString()
         })
         .eq('id', id);
 
@@ -376,9 +379,13 @@ const Dashboard = ({ onLogout }) => {
       setPageInput(1);
       await fetchTableData();
       setShowBatchUpdate(false);
+      // Re-focus input after update [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
     } catch (error) {
       console.error('Error updating batch details:', error);
       alert(`Failed to update batch details: ${error.message}`);
+      // Re-focus input after alert [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
     }
   };
 
@@ -398,11 +405,22 @@ const Dashboard = ({ onLogout }) => {
         setCurrentPage(1);
         setPageInput(1);
         await fetchTableData();
-        focusElement(batchNumberInputRef);
-        window.electronAPI.focusWindow();
+        // Focus input after deletion [Modified]
+        setTimeout(() => focusElement(batchNumberInputRef), 0);
+        // Ensure Electron window is focused, with safety check [Modified]
+        if (window.electronAPI && window.electronAPI.focusWindow) {
+          window.electronAPI.focusWindow();
+        }
       } catch (error) {
         console.error('Error deleting batch:', error);
-        alert(`Failed to delete batch: ${error.message}`);
+        // Log error instead of alert to avoid focus disruption [New]
+        console.error('Failed to delete batch:', error.message);
+        // Focus input after error [New]
+        setTimeout(() => focusElement(batchNumberInputRef), 0);
+        // Attempt window focus in Electron [New]
+        if (window.electronAPI && window.electronAPI.focusWindow) {
+          window.electronAPI.focusWindow();
+        }
       }
     }
   };
@@ -414,12 +432,16 @@ const Dashboard = ({ onLogout }) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
     setPageInput(1);
+    // Re-focus input after pagination change [New]
+    setTimeout(() => focusElement(batchNumberInputRef), 0);
   };
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setPageInput(page);
+      // Re-focus input after page change [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
     }
   };
 
@@ -434,6 +456,8 @@ const Dashboard = ({ onLogout }) => {
       goToPage(page);
     } else {
       setPageInput(currentPage);
+      // Re-focus input after invalid jump [New]
+      setTimeout(() => focusElement(batchNumberInputRef), 0);
     }
   };
 
@@ -467,6 +491,11 @@ const Dashboard = ({ onLogout }) => {
   const focusElement = (ref) => {
     if (ref.current) {
       ref.current.focus();
+      // Force focus by blurring active element first [New]
+      if (document.activeElement !== ref.current) {
+        document.activeElement.blur();
+        ref.current.focus();
+      }
     }
   };
 
