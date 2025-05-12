@@ -199,6 +199,8 @@ const Dashboard = ({ onLogout }) => {
       alert('Failed to fetch table data. Check your Supabase connection.');
       setTableData([]);
       setTotalRows(0);
+      // Re-focus input after alert
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   }, [currentPage, rowsPerPage]);
 
@@ -223,6 +225,8 @@ const Dashboard = ({ onLogout }) => {
           { id: 2, product_name: 'SEL Rosin Concentrate' },
           { id: 3, product_name: 'Plant Precision FL Relieve Gel' }
         ]);
+        // Re-focus input after alert
+        requestAnimationFrame(() => focusElement(batchNumberInputRef));
       }
     };
 
@@ -245,6 +249,8 @@ const Dashboard = ({ onLogout }) => {
   const handleSubmit = async () => {
     if (!allFieldsFilled) {
       alert('Please fill in all fields.');
+      // Re-focus input after alert
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
       return;
     }
 
@@ -304,8 +310,8 @@ const Dashboard = ({ onLogout }) => {
     } catch (error) {
       console.error('Error submitting batch details:', error);
       alert(`Failed to submit batch details: ${error.message}`);
-      // Re-focus input after alert [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after alert
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
 
@@ -325,8 +331,8 @@ const Dashboard = ({ onLogout }) => {
 
     if (isLocked && !withinGracePeriod) {
       alert('This batch is locked and cannot be edited (grace period expired).');
-      // Re-focus input after alert [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after alert
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
       return;
     }
 
@@ -379,13 +385,13 @@ const Dashboard = ({ onLogout }) => {
       setPageInput(1);
       await fetchTableData();
       setShowBatchUpdate(false);
-      // Re-focus input after update [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after update
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     } catch (error) {
       console.error('Error updating batch details:', error);
       alert(`Failed to update batch details: ${error.message}`);
-      // Re-focus input after alert [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after alert
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
 
@@ -405,19 +411,25 @@ const Dashboard = ({ onLogout }) => {
         setCurrentPage(1);
         setPageInput(1);
         await fetchTableData();
-        // Focus input after deletion [Modified]
-        setTimeout(() => focusElement(batchNumberInputRef), 0);
-        // Ensure Electron window is focused, with safety check [Modified]
+        // Focus input after deletion with retry mechanism
+        requestAnimationFrame(() => {
+          focusElement(batchNumberInputRef);
+          // Retry focus after a short delay to ensure DOM stability
+          setTimeout(() => focusElement(batchNumberInputRef), 100);
+        });
+        // Ensure Electron window is focused
         if (window.electronAPI && window.electronAPI.focusWindow) {
           window.electronAPI.focusWindow();
         }
       } catch (error) {
         console.error('Error deleting batch:', error);
-        // Log error instead of alert to avoid focus disruption [New]
         console.error('Failed to delete batch:', error.message);
-        // Focus input after error [New]
-        setTimeout(() => focusElement(batchNumberInputRef), 0);
-        // Attempt window focus in Electron [New]
+        // Focus input after error with retry
+        requestAnimationFrame(() => {
+          focusElement(batchNumberInputRef);
+          setTimeout(() => focusElement(batchNumberInputRef), 100);
+        });
+        // Attempt window focus in Electron
         if (window.electronAPI && window.electronAPI.focusWindow) {
           window.electronAPI.focusWindow();
         }
@@ -432,16 +444,16 @@ const Dashboard = ({ onLogout }) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
     setPageInput(1);
-    // Re-focus input after pagination change [New]
-    setTimeout(() => focusElement(batchNumberInputRef), 0);
+    // Re-focus input after pagination change
+    requestAnimationFrame(() => focusElement(batchNumberInputRef));
   };
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setPageInput(page);
-      // Re-focus input after page change [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after page change
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
 
@@ -456,8 +468,8 @@ const Dashboard = ({ onLogout }) => {
       goToPage(page);
     } else {
       setPageInput(currentPage);
-      // Re-focus input after invalid jump [New]
-      setTimeout(() => focusElement(batchNumberInputRef), 0);
+      // Re-focus input after invalid jump
+      requestAnimationFrame(() => focusElement(batchNumberInputRef));
     }
   };
 
@@ -490,12 +502,22 @@ const Dashboard = ({ onLogout }) => {
 
   const focusElement = (ref) => {
     if (ref.current) {
-      ref.current.focus();
-      // Force focus by blurring active element first [New]
-      if (document.activeElement !== ref.current) {
-        document.activeElement.blur();
+      // Use requestAnimationFrame for reliable focus
+      requestAnimationFrame(() => {
+        // Blur active element to clear any stuck focus
+        if (document.activeElement !== ref.current) {
+          document.activeElement.blur();
+        }
         ref.current.focus();
-      }
+        // Verify focus
+        if (document.activeElement !== ref.current) {
+          console.log('Focus failed, retrying...');
+          ref.current.focus();
+        }
+        console.log('Focused batchNumberInput:', document.activeElement);
+      });
+    } else {
+      console.log('batchNumberInputRef is null');
     }
   };
 

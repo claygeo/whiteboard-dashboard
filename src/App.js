@@ -1,65 +1,77 @@
-import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import './App.css';
 
 const App = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-    const checkAuth = () => {
-        const line = localStorage.getItem('line');
-        const lineLead = localStorage.getItem('lineLead');
-        console.log('App.js checkAuth - line:', line, 'lineLead:', lineLead);
-        if (line && lineLead) {
-            setIsAuthenticated(true);
-        } else {
-            setIsAuthenticated(false);
+  const checkAuth = () => {
+    const line = localStorage.getItem('line');
+    const lineLead = localStorage.getItem('lineLead');
+    console.log('App.js checkAuth - line:', line, 'lineLead:', lineLead);
+    const authenticated = !!(line && lineLead);
+    setIsAuthenticated(authenticated);
+    return authenticated;
+  };
+
+  const handleAuthChange = () => {
+    const authenticated = checkAuth();
+    if (authenticated) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
+  };
+
+  useEffect(() => {
+    // Clear localStorage on app launch to enforce login
+    console.log('Clearing localStorage on app launch');
+    localStorage.removeItem('line');
+    localStorage.removeItem('lineLead');
+    setIsAuthenticated(false);
+    navigate('/', { replace: true });
+  }, [navigate]);
+
+  useEffect(() => {
+    const logActiveElement = () => {
+      console.log('Active element:', document.activeElement);
+    };
+
+    window.addEventListener('focusin', logActiveElement);
+    window.addEventListener('click', logActiveElement);
+
+    return () => {
+      window.removeEventListener('focusin', logActiveElement);
+      window.removeEventListener('click', logActiveElement);
+    };
+  }, []);
+
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<Login onAuthChange={handleAuthChange} />}
+      />
+      <Route
+        path="/dashboard"
+        element={
+          isAuthenticated ? (
+            <Dashboard onLogout={() => {
+              localStorage.removeItem('line');
+              localStorage.removeItem('lineLead');
+              setIsAuthenticated(false);
+              navigate('/', { replace: true });
+            }} />
+          ) : (
+            <Login onAuthChange={handleAuthChange} />
+          )
         }
-    };
-
-    useEffect(() => {
-        // Check authentication state on mount
-        checkAuth();
-        // Debug focus issues by logging active element
-        const handleFocusChange = () => {
-            console.log('Active element:', document.activeElement);
-        };
-        document.addEventListener('focusin', handleFocusChange);
-        return () => document.removeEventListener('focusin', handleFocusChange);
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem('line');
-        localStorage.removeItem('lineLead');
-        setIsAuthenticated(false);
-    };
-
-    return (
-        <Router>
-            <Routes>
-                <Route
-                    path="/"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/dashboard" replace />
-                        ) : (
-                            <Login onAuthChange={checkAuth} />
-                        )
-                    }
-                />
-                <Route
-                    path="/dashboard"
-                    element={
-                        isAuthenticated ? (
-                            <Dashboard onLogout={handleLogout} />
-                        ) : (
-                            <Navigate to="/" replace />
-                        )
-                    }
-                />
-            </Routes>
-        </Router>
-    );
+      />
+    </Routes>
+  );
 };
 
 export default App;
