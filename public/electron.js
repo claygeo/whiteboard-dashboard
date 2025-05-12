@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const isDev = require('electron-is-dev');
 
 function createWindow() {
@@ -17,14 +18,25 @@ function createWindow() {
   win.maximize();
 
   // Load the correct URL based on environment
-  const url = isDev
-    ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, '../build/index.html')}`;
+  let url;
+  if (isDev) {
+    url = 'http://localhost:3000';
+  } else {
+    const filePath = path.join(__dirname, '../build/index.html');
+    // Verify file exists in production
+    if (!fs.existsSync(filePath)) {
+      console.error(`Production index.html not found at: ${filePath}`);
+      app.quit();
+      return;
+    }
+    url = `file://${filePath}`;
+  }
 
   console.log(`Environment: ${isDev ? 'Development' : 'Production'}, Loading URL: ${url}`);
 
   win.loadURL(url).catch((err) => {
     console.error('Failed to load URL:', err);
+    app.quit();
   });
 
   // Open DevTools only in development
@@ -38,6 +50,16 @@ function createWindow() {
     if (win && !win.isFocused()) {
       win.focus();
     }
+  });
+
+  // Log when page finishes loading
+  win.webContents.on('did-finish-load', () => {
+    console.log('Page finished loading:', url);
+  });
+
+  // Log navigation failures
+  win.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error(`Failed to load ${validatedURL}: ${errorCode} - ${errorDescription}`);
   });
 }
 

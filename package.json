@@ -46,10 +46,12 @@
         "files": [
             "build/**/*",
             "public/electron.js",
-            "!src/**/*"
+            "public/preload.js",
+            "build/assets/**/*"
         ],
         "directories": {
-            "buildResources": "assets"
+            "buildResources": "assets",
+            "output": "dist"
         },
         "win": {
             "target": [
