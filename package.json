@@ -34,7 +34,8 @@
     "devDependencies": {
         "@craco/craco": "^7.1.0",
         "electron": "^25.0.0",
-        "electron-builder": "^24.0.0"
+        "electron-builder": "^24.0.0",
+        "craco-plugin-copy": "^0.1.1"
     },
     "_moduleAliases": {
         "react": "node_modules/react",
@@ -47,6 +48,7 @@
             "build/**/*",
             "public/electron.js",
             "public/preload.js",
+            "public/loading.html",
             "build/assets/**/*"
         ],
         "directories": {
