@@ -11,7 +11,7 @@
         "test": "craco test",
         "eject": "react-scripts eject",
         "start:electron": "concurrently \"craco start\" \"wait-on http://localhost:3000 && electron .\"",
-        "electron:build": "npm run build && electron-builder --win --x64"
+        "electron:build": "rmdir /s /q dist & npm run build && electron-builder --win --x64 --force"
     },
     "dependencies": {
         "@csstools/normalize.css": "^12.0.0",
@@ -44,6 +44,7 @@
         "appId": "com.example.whiteboard",
         "productName": "Whiteboard Project",
         "files": [
+            "build/",
             "build/**/*",
             "public/electron.js",
             "public/preload.js",

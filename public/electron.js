@@ -22,11 +22,20 @@ function createWindow() {
   if (isDev) {
     url = 'http://localhost:3000';
   } else {
+    // Verify preload.js exists
+    const preloadPath = path.join(__dirname, 'preload.js');
+    if (!fs.existsSync(preloadPath)) {
+      console.error(`preload.js not found at: ${preloadPath}`);
+      app.quit();
+      return;
+    }
+
     // Try multiple paths for build/index.html
     const possiblePaths = [
       path.join(__dirname, '../build/index.html'),
       path.join(__dirname, '../../build/index.html'),
-      path.join(app.getAppPath(), 'build/index.html')
+      path.join(app.getAppPath(), 'build/index.html'),
+      path.join(__dirname, 'build/index.html')
     ];
     let filePath;
     for (const p of possiblePaths) {
@@ -40,8 +49,9 @@ function createWindow() {
       console.error('Production index.html not found in any paths:', possiblePaths);
       console.error('Current __dirname:', __dirname);
       console.error('App path:', app.getAppPath());
-      console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')));
-      console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')));
+      console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')) || []);
+      console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')) || []);
+      console.error('App path contents:', fs.readdirSync(app.getAppPath()) || []);
       app.quit();
       return;
     }
