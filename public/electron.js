@@ -21,12 +21,15 @@ function createWindow() {
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, '../build/index.html')}`;
 
+  console.log(`Environment: ${isDev ? 'Development' : 'Production'}, Loading URL: ${url}`);
+
   win.loadURL(url).catch((err) => {
     console.error('Failed to load URL:', err);
   });
 
-  // Open DevTools in development for debugging
+  // Open DevTools only in development
   if (isDev) {
+    console.log('Opening DevTools in development mode');
     win.webContents.openDevTools();
   }
 
