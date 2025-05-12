@@ -45,6 +45,12 @@
       "public/preload.js",
       "public/assets/**/*"
     ],
+	"extraResources": [
+    "build/**/*",
+    "public/electron.js",
+    "public/preload.js",
+    "public/assets/**/*"
+  ],
     "directories": {
       "buildResources": "public/assets",
       "output": "dist"
