@@ -25,8 +25,9 @@ const Login = ({ onAuthChange }) => {
             onAuthChange();
             navigate('/dashboard', { replace: true });
             // Ensure Electron window is focused
-            const { ipcRenderer } = window.require('electron');
-            ipcRenderer.send('focus-window');
+            if (window.electronAPI && window.electronAPI.focusWindow) {
+                window.electronAPI.focusWindow();
+            }
         } else {
             alert('Please select both Line and Line Lead.');
         }
