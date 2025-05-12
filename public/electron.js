@@ -23,19 +23,27 @@ function createWindow() {
     url = 'http://localhost:3000';
   } else {
     // Try multiple paths for build/index.html
-    let filePath = path.join(__dirname, '../build/index.html');
-    if (!fs.existsSync(filePath)) {
-      console.warn(`index.html not found at: ${filePath}`);
-      // Alternative path: resources/app/build/
-      filePath = path.join(__dirname, '../../build/index.html');
-      if (!fs.existsSync(filePath)) {
-        console.error(`Production index.html not found at: ${filePath}`);
-        console.error('Current __dirname:', __dirname);
-        console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')));
-        console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')));
-        app.quit();
-        return;
+    const possiblePaths = [
+      path.join(__dirname, '../build/index.html'),
+      path.join(__dirname, '../../build/index.html'),
+      path.join(app.getAppPath(), 'build/index.html')
+    ];
+    let filePath;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        filePath = p;
+        break;
       }
+      console.warn(`index.html not found at: ${p}`);
+    }
+    if (!filePath) {
+      console.error('Production index.html not found in any paths:', possiblePaths);
+      console.error('Current __dirname:', __dirname);
+      console.error('App path:', app.getAppPath());
+      console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')));
+      console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')));
+      app.quit();
+      return;
     }
     url = `file://${filePath}`;
   }
