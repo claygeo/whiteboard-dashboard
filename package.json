@@ -11,7 +11,7 @@
         "test": "craco test",
         "eject": "react-scripts eject",
         "start:electron": "concurrently \"craco start\" \"wait-on http://localhost:3000 && electron .\"",
-        "electron:build": "rmdir /s /q dist & npm run build && electron-builder --win --x64 --force"
+        "electron:build": "if exist dist rmdir /s /q dist && npm run build && electron-builder --win --x64 --verbose"
     },
     "dependencies": {
         "@csstools/normalize.css": "^12.0.0",

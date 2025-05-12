@@ -30,28 +30,19 @@ function createWindow() {
       return;
     }
 
-    // Try multiple paths for build/index.html
-    const possiblePaths = [
-      path.join(__dirname, '../build/index.html'),
-      path.join(__dirname, '../../build/index.html'),
-      path.join(app.getAppPath(), 'build/index.html'),
-      path.join(__dirname, 'build/index.html')
-    ];
-    let filePath;
-    for (const p of possiblePaths) {
-      if (fs.existsSync(p)) {
-        filePath = p;
-        break;
-      }
-      console.warn(`index.html not found at: ${p}`);
-    }
-    if (!filePath) {
-      console.error('Production index.html not found in any paths:', possiblePaths);
+    // Try primary path for build/index.html
+    const filePath = path.join(__dirname, '../build/index.html');
+    if (!fs.existsSync(filePath)) {
+      console.error(`Production index.html not found at: ${filePath}`);
       console.error('Current __dirname:', __dirname);
       console.error('App path:', app.getAppPath());
-      console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')) || []);
-      console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')) || []);
-      console.error('App path contents:', fs.readdirSync(app.getAppPath()) || []);
+      try {
+        console.error('Root directory contents:', fs.readdirSync(path.join(__dirname, '../..')) || []);
+        console.error('Parent directory contents:', fs.readdirSync(path.join(__dirname, '..')) || []);
+        console.error('App path contents:', fs.readdirSync(app.getAppPath()) || []);
+      } catch (err) {
+        console.error('Error reading directories:', err);
+      }
       app.quit();
       return;
     }
@@ -65,7 +56,7 @@ function createWindow() {
     app.quit();
   });
 
-  // Open DevTools only in development or with --debug
+  // Open DevTools in development or with --debug
   if (isDev || process.argv.includes('--debug')) {
     console.log('Opening DevTools');
     win.webContents.openDevTools();
