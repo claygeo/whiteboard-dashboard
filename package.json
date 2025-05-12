@@ -7,7 +7,7 @@
     "homepage": "./",
     "scripts": {
         "start": "craco start",
-        "build": "craco build && copyfiles -u 2 public/assets/**/* build/assets",
+        "build": "craco build && xcopy public\\assets build\\assets /I /E /Y",
         "test": "craco test",
         "eject": "react-scripts eject",
         "start:electron": "concurrently \"craco start\" \"wait-on http://localhost:3000 && electron .\"",
@@ -34,8 +34,7 @@
     "devDependencies": {
         "@craco/craco": "^7.1.0",
         "electron": "^25.0.0",
-        "electron-builder": "^24.0.0",
-        "copyfiles": "^2.4.1"
+        "electron-builder": "^24.0.0"
     },
     "_moduleAliases": {
         "react": "node_modules/react",
