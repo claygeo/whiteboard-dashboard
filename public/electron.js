@@ -9,31 +9,57 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'), // Add preload script
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
+
+  // Maximize window
   win.maximize();
-  win.loadURL(
-    isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
-  );
+
+  // Load the correct URL based on environment
+  const url = isDev
+    ? 'http://localhost:3000'
+    : `file://${path.join(__dirname, '../build/index.html')}`;
+
+  win.loadURL(url).catch((err) => {
+    console.error('Failed to load URL:', err);
+  });
+
+  // Open DevTools in development for debugging
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
+
+  // Handle window focus IPC
+  ipcMain.on('focus-window', (event) => {
+    if (win && !win.isFocused()) {
+      win.focus();
+    }
+  });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-
-// Handle focus-window IPC request
-ipcMain.on('focus-window', (event) => {
-  const win = BrowserWindow.getFocusedWindow();
-  if (win && !win.isFocused()) {
-    win.focus();
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
+});
+
+// Log errors during app initialization
+app.on('web-contents-created', (event, webContents) => {
+  webContents.on('render-process-gone', (event, details) => {
+    console.error('Renderer process crashed:', details);
+  });
+  webContents.on('unresponsive', () => {
+    console.error('Renderer process became unresponsive');
+  });
 });
