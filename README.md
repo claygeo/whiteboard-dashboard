@@ -127,12 +127,6 @@ CREATE TABLE weekly_batch_summary (
     CHECK (actual_units IS NOT NULL)
 );
 
-## Notes:
-
-- Run the SQL code in the order provided to avoid dependency issues.
-- The uuid-ossp extension is included as a precaution, though not used in these tables.
-- Ensure Row-Level Security (RLS) is configured in Supabase if your application requires it (e.g., enable RLS and set  policies via the Supabase dashboard).
-
 ## Visuals
 
 Below are screenshots showcasing the application's interface and features.
