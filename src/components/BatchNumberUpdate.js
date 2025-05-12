@@ -109,6 +109,7 @@ const BatchNumberUpdate = ({ row, onClose, onUpdate }) => {
         actual_units: parseInt(actualUnits) || 0,
         product: row.product
       });
+      alert('Batch update submitted successfully! You have 5 minutes to make further edits.');
       setIsClosing(true);
     } catch (error) {
       console.error('Error submitting update:', error);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import DataTable from './DataTable';
 import BatchNumberUpdate from './BatchNumberUpdate';
-import ProductSelector from './ProductSelector'; // Fixed import
+import ProductSelector from './ProductSelector';
 import { supabase } from './supabaseClient';
 import { format, toZonedTime } from 'date-fns-tz';
 import '../styles/Dashboard.css';
@@ -184,7 +184,7 @@ const Dashboard = ({ onLogout }) => {
 
       const { data, error, count } = await supabase
         .from('batch_data')
-        .select('*, is_locked, line_status', { count: 'exact' })
+        .select('*, is_locked, line_status, submitted_at', { count: 'exact' }) // Added submitted_at
         .range(from, to)
         .order('created_at', { ascending: false });
 
@@ -315,6 +315,18 @@ const Dashboard = ({ onLogout }) => {
   };
 
   const handleRowDoubleClick = (row) => {
+    // Check if batch is editable (not locked or within 5-minute grace period)
+    const isLocked = row.is_locked;
+    const submittedAt = row.submitted_at ? new Date(row.submitted_at) : null;
+    const now = new Date();
+    const GRACE_PERIOD_MS = 5 * 60 * 1000; // 5 minutes
+    const withinGracePeriod = submittedAt && (now - submittedAt) <= GRACE_PERIOD_MS;
+
+    if (isLocked && !withinGracePeriod) {
+      alert('This batch is locked and cannot be edited (grace period expired).');
+      return;
+    }
+
     setSelectedRow(row);
     setShowBatchUpdate(true);
   };
@@ -351,7 +363,8 @@ const Dashboard = ({ onLogout }) => {
           target_delta: calculations.target_delta,
           delta_percentage: calculations.delta_percentage,
           is_locked: true,
-          line_status: 'Closed'
+          line_status: 'Closed',
+          submitted_at: new Date().toISOString() // Set submitted_at on update
         })
         .eq('id', id);
 
